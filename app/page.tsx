@@ -2,53 +2,44 @@
 import Background from "@/components/background";
 import Button, { ButtonProps } from "@/components/button";
 
-const buttonIds = [
-  "spotify",
-  "apple music",
-  "bandcamp",
-  "soundcloud",
-  "tiktok",
-  "instagram",
-  "email",
-] as const;
-type ButtonId = (typeof buttonIds)[number];
-
 export default function Home() {
-  const handleButtonClick = (id: ButtonId) => () => {
-    switch (id) {
-      case "spotify":
-        window.open(
-          "https://open.spotify.com/artist/33IUlB3VxN8hnkdspcLk7v",
-          "_blank"
-        );
-        break;
-      case "apple music":
-        window.open(
-          "https://music.apple.com/fr/artist/literally-the-moon/1736386562",
-          "_blank"
-        );
-        break;
-      case "bandcamp":
-        window.open("https://literallythemoon.bandcamp.com/", "_blank");
-        break;
-      case "soundcloud":
-        window.open("https://soundcloud.com/literally-the-moon", "_blank");
-        break;
-      case "tiktok":
-        window.open("https://www.tiktok.com/@literallymoonmusic", "_blank");
-        break;
-      case "instagram":
-        window.open("https://www.instagram.com/literallymoonmusic/", "_blank");
-        break;
-      case "email":
-        window.open("mailto:literallythemoonmusic@gmail.com", "_blank");
-        break;
-    }
-  };
-  const buttonData: ButtonProps[] = buttonIds.map((id) => ({
-    children: id,
-    onClick: handleButtonClick(id),
-  }));
+  const buttonData: ButtonProps[] = [
+    {
+      children: "spotify",
+      href: "https://open.spotify.com/artist/33IUlB3VxN8hnkdspcLk7v",
+      target: "_blank",
+    },
+    {
+      children: "apple music",
+      href: "https://music.apple.com/fr/artist/literally-the-moon/1736386562",
+      target: "_blank",
+    },
+    {
+      children: "bandcamp",
+      href: "https://literallythemoon.bandcamp.com/",
+      target: "_blank",
+    },
+    {
+      children: "soundcloud",
+      href: "https://soundcloud.com/literally-the-moon",
+      target: "_blank",
+    },
+    {
+      children: "tiktok",
+      href: "https://www.tiktok.com/@literallymoonmusic",
+      target: "_blank",
+    },
+    {
+      children: "instagram",
+      href: "https://www.instagram.com/literallymoonmusic/",
+      target: "_blank",
+    },
+    {
+      children: "email",
+      href: "mailto:literallythemoonmusic@gmail.com",
+      target: "_blank",
+    },
+  ];
 
   return (
     <>
@@ -59,7 +50,6 @@ export default function Home() {
             <h1 className="text-4xl md:text-6xl tracking-tight">
               literally the moon
             </h1>
-            {/* <p>i&apos;m all over the place</p> */}
           </div>
           <div className="flex flex-col gap-8">
             {buttonData.map((buttonProps, index) => (

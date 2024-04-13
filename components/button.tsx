@@ -13,6 +13,8 @@ export interface ButtonProps {
   isSubmit?: boolean;
   form?: string;
   disableTransition?: boolean;
+  href?: string;
+  target?: string;
   onClick?(event: MouseEvent<HTMLButtonElement>): void;
 }
 
@@ -25,6 +27,8 @@ export default function Button({
   disableTransition = false,
   isSubmit,
   form,
+  href,
+  target,
   onClick,
   className,
 }: ButtonProps) {
@@ -39,6 +43,7 @@ export default function Button({
     "disabled:bg-gray-200 disabled:border-gray-200 disabled:text-gray-400 md:hover:outline-double md:hover:outline-8";
   const loadingClasses = loading && "pointer-events-none";
   const classes = `${typeClasses} ${sizeClasses} ${stateClasses} ${transitionClasses} ${loadingClasses} ${shadowClasses}`;
+  const containerClasses = `relative flex justify-center items-center flex-nowrap gap-2 rounded-[32px] shadow-2xl shadow-black font-medium whitespace-nowrap ${classes} ${className}`;
   const loaderMarkup = loading ? (
     <div
       className={`absolute top-0 left-0 w-full h-full flex justify-center items-center ${classes}`}
@@ -47,9 +52,23 @@ export default function Button({
     </div>
   ) : null;
 
+  if (href) {
+    return (
+      <a
+        className={containerClasses}
+        href={href}
+        target={target}
+        rel="noopener noreferrer"
+      >
+        {children}
+        {loaderMarkup}
+      </a>
+    );
+  }
+
   return (
     <button
-      className={`relative flex justify-center items-center flex-nowrap gap-2 rounded-[32px] shadow-2xl shadow-black font-medium whitespace-nowrap ${classes} ${className}`}
+      className={containerClasses}
       disabled={disabled}
       onClick={onClick}
       type={isSubmit ? "submit" : "button"}
