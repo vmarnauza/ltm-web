@@ -130,10 +130,10 @@ void main() {
     r.y = fbm( st + q*0.5899 + vec2(3.4505,0.3149)+ 0.5978*time);
     float f = fbm(st+r);
     color = mix(vec3(0.0837, 0.5855, 0.7247),
-                vec3(0.1151,0.3307,0.5294),
+                vec3(0.8151,0.3307,0.5294),
                 clamp((f*f)*6.7746,0.0,1.0));
     color = mix(color,
-                vec3(0.7, 0.7, 0.7),
+                vec3(0, 0, 0),
                 clamp(length(q),0.0,1.0));
     color = mix(color,
                 vec3(0.2105,0.3042,0.7610),
