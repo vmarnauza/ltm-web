@@ -36,7 +36,7 @@ function initBackground(container: HTMLDivElement) {
   renderer.setPixelRatio(devicePixelRatio);
   renderer.setSize(innerWidth, innerHeight);
   // light setup
-  const pointLight = new THREE.PointLight(0x404040, 70, 0, 0.01);
+  const pointLight = new THREE.PointLight(0x404040, 80, 0, 0.01);
   pointLight.position.set(-20, 10, 20);
   pointLight.castShadow = true;
   scene.add(pointLight);
@@ -143,7 +143,7 @@ function initBackground(container: HTMLDivElement) {
         randomZ > 0 ? randomZ + positionOffset : randomZ - positionOffset
       );
 
-      cloud.material.opacity = 0.5;
+      cloud.material.opacity = 0.3;
       cloudParticles.push(cloud);
       scene.add(cloud);
     }
@@ -157,7 +157,8 @@ function initBackground(container: HTMLDivElement) {
       sphere.rotation.y += 0.0005;
     }
     cloudParticles.forEach((cloud) => {
-      cloud.rotation.z -= 0.0002;
+      const rotationSpeed = 0.0001 + Math.random() * 0.0003;
+      cloud.rotation.z -= rotationSpeed;
     });
 
     requestAnimationFrame(render);
@@ -168,6 +169,14 @@ function initBackground(container: HTMLDivElement) {
   window.addEventListener("mousemove", (event) => {
     const posX = event.clientX;
     const posY = event.clientY;
+
+    pointLight.position.x = ((posX / window.innerWidth) * 2 - 1) * 20;
+    pointLight.position.y = ((posY / window.innerHeight) * 2 - 1) * 20 * -0.1;
+  });
+
+  window.addEventListener("touchmove", (event) => {
+    const posX = event.touches[0].clientX;
+    const posY = event.touches[0].clientY;
 
     pointLight.position.x = ((posX / window.innerWidth) * 2 - 1) * 20;
     pointLight.position.y = ((posY / window.innerHeight) * 2 - 1) * 20 * -0.1;

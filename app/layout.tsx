@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import { Noto_Sans } from "next/font/google";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
-
-const font = Noto_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "literally the moon",
@@ -16,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`bg-black ${font.className}`}>{children}</body>
+      <body className={`bg-black ${GeistMono.className}`}>{children}</body>
     </html>
   );
 }

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "geist": "^1.4.2",
     "next": "15.3.4",
     "postprocessing": "^6.37.4",
     "react": "19.1.0",
