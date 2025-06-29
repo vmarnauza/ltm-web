@@ -1,9 +1,10 @@
 "use client";
 import Background from "@/components/background";
 import Button, { ButtonProps } from "@/components/button";
+import Link from "next/link";
 
 export default function Home() {
-  const buttonData: ButtonProps[] = [
+  const buttonData = [
     {
       children: "spotify",
       href: "https://open.spotify.com/artist/33IUlB3VxN8hnkdspcLk7v",
@@ -44,16 +45,22 @@ export default function Home() {
   return (
     <>
       <Background />
-      <main className="flex min-h-screen flex-col items-center justify-between z-10 py-24 px-4">
-        <div className="w-full max-w-screen-sm flex-grow flex flex-col gap-16 text-center">
-          <div className="flex flex-col gap-4 text-white opacity-85">
-            <h1 className="text-4xl md:text-6xl tracking-tight">
-              literally the moon
-            </h1>
-          </div>
-          <div className="flex flex-col gap-8">
-            {buttonData.map((buttonProps, index) => (
-              <Button key={index} {...buttonProps} className="w-full" />
+      <main className="relative flex-grow flex min-h-screen flex-col justify-between z-10 p-4 bg-stone-950/20">
+        <div className="absolute bottom-4 right-4 text-white opacity-85">
+          <h1 className="hidden md:block text-4xl tracking-tight">
+            literally the moon
+          </h1>
+        </div>
+        <div className="max-w-screen-sm">
+          <div className="flex flex-col gap-6">
+            {buttonData.map((props, index) => (
+              <Link
+                key={index}
+                {...props}
+                className="w-full text-white font-light text-lg"
+              >
+                {props.children}
+              </Link>
             ))}
           </div>
         </div>

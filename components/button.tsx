@@ -35,7 +35,7 @@ export default function Button({
   const typeClasses = getButtonTypeClasses(type);
   const sizeClasses = getButtonSizeClasses(size);
   const shadowClasses = "";
-  // "shadow-[inset_1px_0_#a855f7,_inset_-1px_0_#a855f7,_inset_0_1px_#a855f7,_inset_0_-3px_#a855f7]";
+  // "shadow-[inset_1px_0_#a855f7,inset_-1px_0_#a855f7,inset_0_1px_#a855f7,inset_0_-3px_#a855f7]";
   const transitionClasses = disableTransition
     ? null
     : "transition-all duration-200";
@@ -43,7 +43,7 @@ export default function Button({
     "disabled:bg-gray-200 disabled:border-gray-200 disabled:text-gray-400 md:hover:outline-double md:hover:outline-8";
   const loadingClasses = loading && "pointer-events-none";
   const classes = `${typeClasses} ${sizeClasses} ${stateClasses} ${transitionClasses} ${loadingClasses} ${shadowClasses}`;
-  const containerClasses = `relative flex justify-center items-center flex-nowrap gap-2 rounded-[32px] shadow-2xl shadow-black font-medium whitespace-nowrap ${classes} ${className}`;
+  const containerClasses = `relative flex justify-center items-center flex-nowrap gap-2 font-medium whitespace-nowrap ${classes} ${className}`;
   const loaderMarkup = loading ? (
     <div
       className={`absolute top-0 left-0 w-full h-full flex justify-center items-center ${classes}`}
@@ -88,7 +88,7 @@ function getButtonTypeClasses(type: ButtonType): string {
       return "bg-lime-500 text-white border-gray-900";
     case "primary":
     default:
-      return "text-white bg-gray-900 outline outline-gray-100 outline-offset-4";
+      return "text-white bg-gray-900 outline-solid outline-gray-100 outline-offset-4";
   }
 }
 

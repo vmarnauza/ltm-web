@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Noto_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const font = Noto_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "literally the moon",
@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`bg-black ${inter.className}`}>{children}</body>
+      <body className={`bg-black ${font.className}`}>{children}</body>
     </html>
   );
 }

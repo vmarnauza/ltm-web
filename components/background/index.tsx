@@ -1,159 +1,188 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import {
+  EffectComposer,
+  EffectPass,
+  NoiseEffect,
+  RenderPass,
+} from "postprocessing";
 
 export default function Background() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const firstRenderDone = useRef(false);
 
   useEffect(() => {
-    if (canvasRef.current && !firstRenderDone.current) {
-      initBackground(canvasRef.current);
+    if (containerRef.current && !firstRenderDone.current) {
+      initBackground(containerRef.current);
       firstRenderDone.current = true;
     }
   });
 
   return (
-    <div className="w-screen h-screen fixed left-0 top-0 -z-10 overflow-hidden">
-      <canvas ref={canvasRef} />
-    </div>
+    <div
+      ref={containerRef}
+      className="w-screen h-screen fixed left-0 top-0 -z-10 overflow-hidden"
+    ></div>
   );
 }
 
-function initBackground(canvas: HTMLCanvasElement) {
-  const { max } = Math;
+function initBackground(container: HTMLDivElement) {
   const { innerHeight, innerWidth, devicePixelRatio } = window;
-  const s = max(innerHeight, innerWidth) * devicePixelRatio;
-  canvas.width = s;
-  canvas.height = s;
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  const fov = 75;
-  const aspect = 1;
-  const near = 0.1;
-  const far = 20;
-  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(
-    0.018642919740713196,
-    0.062166257361373406,
-    1.8988912022517688
-  );
-  camera.rotation.x = -0.032726499473191346;
-  camera.rotation.y = 0.00981222047356264;
-  camera.rotation.z = 0.00032122915379875284;
-
+  const moonSize = 8;
   const scene = new THREE.Scene();
-  const uniforms = {
-    time: { type: "f", value: 1.0 },
-  };
+  scene.fog = new THREE.FogExp2(0x000000, 0.001);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setClearColor(scene.fog.color);
+  renderer.setPixelRatio(devicePixelRatio);
+  renderer.setSize(innerWidth, innerHeight);
+  // light setup
+  const pointLight = new THREE.PointLight(0x404040, 70, 0, 0.01);
+  pointLight.position.set(-20, 10, 20);
+  pointLight.castShadow = true;
+  scene.add(pointLight);
 
-  const material = new THREE.ShaderMaterial({
-    fragmentShader,
-    vertexShader,
-    uniforms,
+  // const ambientLight = new THREE.AmbientLight(0x404040, 10);
+  // scene.add(ambientLight);
+
+  // const directionalLight = new THREE.DirectionalLight(0xff8c19, 0.5);
+  // directionalLight.position.set(0, 0, 1);
+  // scene.add(directionalLight);
+  // const pointLightHelper = new THREE.PointLightHelper(pointLight, 10, 0xffff00);
+  // scene.add(pointLightHelper);
+
+  const fov = 45;
+  const aspect = innerWidth / innerHeight;
+  const near = 1;
+  const far = 1000;
+  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camera.position.z = 50;
+  camera.position.y = 0;
+
+  var texloader = new THREE.TextureLoader();
+  let sphere: THREE.Mesh;
+  let composer: EffectComposer;
+  texloader.load(
+    "/images/moon-texture.png",
+    (tex) => {
+      const geometry = new THREE.SphereGeometry(moonSize, 22, 22);
+      const material = new THREE.MeshPhongMaterial({
+        color: 0xb2b2b2,
+        normalMap: tex,
+        shininess: 0,
+      });
+
+      sphere = new THREE.Mesh(geometry, material);
+      sphere.rotation.z = 0.5;
+      scene.add(sphere);
+
+      // const bloomEffect = new BloomEffect({
+      //   blendFunction: BlendFunction.COLOR_DODGE,
+      //   kernelSize: KernelSize.SMALL,
+      //   luminanceThreshold: 0.3,
+      //   luminanceSmoothing: 0.75,
+      // });
+      // bloomEffect.blendMode.opacity.value = 1.5;
+      // const glitchEffect = new GlitchEffect();
+      // glitchEffect.minStrength = 0.015;
+      // glitchEffect.maxStrength = 0.1;
+      // glitchEffect.columns = 0;
+      // glitchEffect.ratio = 0.85;
+      // glitchEffect.minDuration = 0.5;
+      // glitchEffect.maxDuration = 2;
+      // glitchEffect.minDelay = 8;
+      // glitchEffect.maxDelay = 20;
+      // glitchEffect.mode = GlitchMode.SPORADIC;
+
+      // const godRaysEffect = new GodRaysEffect(camera, sphere, {
+      //   height: 480,
+      //   kernelSize: 2,
+      //   density: 1,
+      //   decay: 0.9,
+      //   weight: 0.5,
+      //   exposure: 0.3,
+      //   samples: 20,
+      //   clampMax: 0.95,
+      // });
+
+      const noiseEffect = new NoiseEffect();
+      noiseEffect.premultiply = true;
+
+      const effectPass = new EffectPass(camera, noiseEffect);
+      effectPass.renderToScreen = true;
+
+      composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      composer.addPass(effectPass);
+    },
+    (error) => {
+      console.error("Error loading texture:", error);
+    }
+  );
+
+  const cloudParticles: THREE.Mesh[] = [];
+  texloader.load("/images/cloud-particle.png", (tex) => {
+    const cloudGeometry = new THREE.PlaneGeometry(20, 20);
+    const cloudMaterial = new THREE.MeshLambertMaterial({
+      map: tex,
+      transparent: true,
+    });
+
+    const maxClouds = innerWidth > 768 ? 120 : 70;
+    for (let i = 0; i < 100; i++) {
+      const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+      const positionOffset = moonSize;
+      const maxOffset =
+        innerWidth > 768 ? 100 - positionOffset : 70 - positionOffset;
+      const randomX = (Math.random() - 0.5) * maxOffset;
+      const randomY = (Math.random() - 0.5) * maxOffset;
+      const randomZ = (Math.random() - 0.5) * maxOffset;
+
+      cloud.position.set(
+        randomX > 0 ? randomX + positionOffset : randomX - positionOffset,
+        randomY > 0 ? randomY + positionOffset : randomY - positionOffset,
+        randomZ > 0 ? randomZ + positionOffset : randomZ - positionOffset
+      );
+
+      cloud.material.opacity = 0.5;
+      cloudParticles.push(cloud);
+      scene.add(cloud);
+    }
   });
-  const geometry = new THREE.PlaneGeometry(3, 3, 32);
-  const plane = new THREE.Mesh(geometry, material);
-  scene.add(plane);
-  function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
-    const canvas = renderer.domElement;
-    const { innerHeight, innerWidth, devicePixelRatio } = window;
-    const s = max(innerHeight, innerWidth) * devicePixelRatio;
-    const needResize = canvas.width !== s || canvas.height !== s;
-    if (needResize) {
-      renderer.setSize(s, s, false);
-    }
-    return needResize;
-  }
 
-  function render(time: number) {
-    time *= 0.0005;
-    uniforms.time.value = time;
-    if (resizeRendererToDisplaySize(renderer)) {
-      camera.aspect = 1;
-      camera.updateProjectionMatrix();
-    }
+  function render() {
+    // renderer.render(scene, camera);
+    composer?.render();
 
-    renderer.render(scene, camera);
+    if (sphere) {
+      sphere.rotation.y += 0.0005;
+    }
+    cloudParticles.forEach((cloud) => {
+      cloud.rotation.z -= 0.0002;
+    });
 
     requestAnimationFrame(render);
   }
 
   requestAnimationFrame(render);
+
+  window.addEventListener("mousemove", (event) => {
+    const posX = event.clientX;
+    const posY = event.clientY;
+
+    pointLight.position.x = ((posX / window.innerWidth) * 2 - 1) * 20;
+    pointLight.position.y = ((posY / window.innerHeight) * 2 - 1) * 20 * -0.1;
+  });
+
+  window.addEventListener(
+    "resize",
+    () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+    },
+    false
+  );
+
+  container.appendChild(renderer.domElement);
 }
-
-const fragmentShader = `
-uniform float time;
-varying vec2 vUv;
-
-float random (in vec2 _st) {
-    return fract(sin(dot(_st.xy, vec2(12.9898,78.233))) * 43758.5453123);
-}
-
-float noise (in vec2 _st) {
-    vec2 i = floor(_st);
-    vec2 f = fract(_st);
-    float a = random(i);
-    float b = random(i + vec2(1.0, 0.0));
-    float c = random(i + vec2(0.0, 1.0));
-    float d = random(i + vec2(1.0, 1.0));
-
-    vec2 u = f * f * (3.0 - 2.0 * f);
-
-    return mix(a, b, u.x) +
-            (c - a)* u.y * (1.0 - u.x) +
-            (d - b) * u.x * u.y;
-}
-
-#define NUM_OCTAVES 4
-
-float fbm ( in vec2 _st) {
-    float v = 0.0;
-    float a = 0.5;
-    vec2 shift = vec2(100.0);
-    mat2 rot = mat2(cos(0.5), sin(0.5),
-                    -sin(0.5), cos(0.50));
-    for (int i = 0; i < NUM_OCTAVES; ++i) {
-        v += a * noise(_st);
-        _st = rot * _st * 2.0 + shift;
-        a *= 0.5;
-    }
-    return v;
-}
-
-void main() {
-    vec2 st = 20.0 * vUv;
-    vec3 color = vec3(0.0);
-    vec2 q = vec2(0.);
-    q.x = fbm( st + 0.00*time);
-    q.y = fbm( st + vec2(1.0));
-    vec2 r = vec2(0.);
-    r.x = fbm( st + q*3.1261 + vec2(6.4890,3.9225)+ 0.5771*time);
-    r.y = fbm( st + q*0.5899 + vec2(3.4505,0.3149)+ 0.5978*time);
-    float f = fbm(st+r);
-    color = mix(vec3(0.0837, 0.5855, 0.7247),
-                vec3(0.8151,0.3307,0.9294),
-                clamp((f*f)*6.7746,0.0,1.0));
-    color = mix(color,
-                vec3(0.4, 0.4, 0.4),
-                clamp(length(q),0.0,1.0));
-    color = mix(color,
-                vec3(0.3105,0.3042,0.7610),
-                clamp(length(r.x),0.0,1.0));
-
-    gl_FragColor = vec4((f*f*f*0.9483+0.9943*f*f+0.7139*f)*color,1.);
-}
-`;
-
-const vertexShader = `
-uniform float time;
-varying vec2 vUv;
-varying vec3 vNormal;
-varying vec3 vPos;
-
-void main() {
-  vPos = position;
-  vec3 newPos = position;
-  vUv = uv;
-  vNormal = normal;
-  gl_Position = projectionMatrix * modelViewMatrix * vec4( newPos, 1.0 );
-}
-`;
