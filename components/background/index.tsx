@@ -127,7 +127,7 @@ function initBackground(container: HTMLDivElement) {
       transparent: true,
     });
 
-    const maxClouds = innerWidth > 768 ? 120 : 20;
+    const maxClouds = innerWidth > 768 ? 100 : 20;
     for (let i = 0; i < maxClouds; i++) {
       const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
       const positionOffset = moonSize;
