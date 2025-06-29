@@ -44,19 +44,19 @@ export default function Home() {
   return (
     <>
       <Background />
-      <main className="relative flex-grow flex min-h-screen flex-col justify-between z-10 p-4 bg-stone-950/20">
-        <div className="absolute bottom-4 right-4 text-white opacity-85">
-          <h1 className="text-2xl md:text-4xl tracking-wider font-light">
+      <main className="fixed w-screen h-screen flex flex-col justify-between z-10 p-4 md:p-6 bg-stone-950/20">
+        <div className="absolute bottom-4 right-4 text-white">
+          <h1 className="text-xl md:text-4xl tracking-wider font-light">
             literally the moon
           </h1>
         </div>
         <div className="max-w-screen-sm">
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-6 items-start">
             {buttonData.map((props, index) => (
               <Link
                 key={index}
                 {...props}
-                className="w-full text-white font-light tracking-wider text-lg"
+                className="text-white font-light tracking-wider text-lg"
               >
                 {props.children}
               </Link>
