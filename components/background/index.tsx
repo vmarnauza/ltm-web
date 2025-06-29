@@ -5,7 +5,9 @@ import {
   EffectPass,
   NoiseEffect,
   RenderPass,
+  ShaderPass,
 } from "postprocessing";
+import { grainFrag, grainVert } from "./shaders/grain";
 
 export default function Background() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,6 +63,7 @@ function initBackground(container: HTMLDivElement) {
   var texloader = new THREE.TextureLoader();
   let sphere: THREE.Mesh;
   let composer: EffectComposer;
+  let grainMaterial: THREE.ShaderMaterial;
   texloader.load(
     "/images/moon-texture.png",
     (tex) => {
@@ -107,12 +110,33 @@ function initBackground(container: HTMLDivElement) {
       const noiseEffect = new NoiseEffect();
       noiseEffect.premultiply = true;
 
-      const effectPass = new EffectPass(camera, noiseEffect);
-      effectPass.renderToScreen = true;
+      grainMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          inputBuffer: { value: null }, // This is what ShaderPass expects
+          timer: { value: 1.0 },
+          resolution: {
+            value: new THREE.Vector2(innerWidth, innerHeight),
+          },
+          grainamount: { value: 0.05 },
+          colored: { value: false },
+          coloramount: { value: 0.1 },
+          grainsize: { value: 2.5 },
+          lumamount: { value: 0.8 },
+          showBurns: { value: true }, // Toggle film burns and damage
+        },
+        vertexShader: grainVert,
+        fragmentShader: grainFrag,
+      });
+      const grainPass = new ShaderPass(grainMaterial);
+      grainPass.renderToScreen = false; // Let composer handle this
+
+      // const effectPass = new EffectPass(camera, noiseEffect);
+      // effectPass.renderToScreen = true;
 
       composer = new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene, camera));
-      composer.addPass(effectPass);
+      composer.addPass(grainPass);
+      // composer.addPass(effectPass);
     },
     (error) => {
       console.error("Error loading texture:", error);
@@ -152,6 +176,11 @@ function initBackground(container: HTMLDivElement) {
   function render() {
     // renderer.render(scene, camera);
     composer?.render();
+
+    // Update grain shader timer
+    if (grainMaterial) {
+      grainMaterial.uniforms.timer.value = performance.now() * 0.001;
+    }
 
     if (sphere) {
       sphere.rotation.y += 0.0005;
