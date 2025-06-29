@@ -36,7 +36,7 @@ function initBackground(container: HTMLDivElement) {
   renderer.setPixelRatio(devicePixelRatio);
   renderer.setSize(innerWidth, innerHeight);
   // light setup
-  const pointLight = new THREE.PointLight(0x404040, 80, 0, 0.01);
+  const pointLight = new THREE.PointLight(0x404040, 70, 0, 0.01);
   pointLight.position.set(-20, 10, 20);
   pointLight.castShadow = true;
   scene.add(pointLight);
@@ -127,7 +127,7 @@ function initBackground(container: HTMLDivElement) {
       transparent: true,
     });
 
-    const maxClouds = innerWidth > 768 ? 100 : 20;
+    const maxClouds = innerWidth > 768 ? 120 : 20;
     for (let i = 0; i < maxClouds; i++) {
       const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
       const positionOffset = moonSize;
