@@ -121,18 +121,18 @@ function initBackground(container: HTMLDivElement) {
 
   const cloudParticles: THREE.Mesh[] = [];
   texloader.load("/images/cloud-particle.png", (tex) => {
-    const cloudGeometry = new THREE.PlaneGeometry(20, 20);
+    const cloudGeometry = new THREE.PlaneGeometry(22, 22);
     const cloudMaterial = new THREE.MeshLambertMaterial({
       map: tex,
       transparent: true,
     });
 
-    const maxClouds = innerWidth > 768 ? 120 : 70;
-    for (let i = 0; i < 100; i++) {
+    const maxClouds = innerWidth > 768 ? 120 : 20;
+    for (let i = 0; i < maxClouds; i++) {
       const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
       const positionOffset = moonSize;
       const maxOffset =
-        innerWidth > 768 ? 100 - positionOffset : 70 - positionOffset;
+        innerWidth > 768 ? 100 - positionOffset : 40 - positionOffset;
       const randomX = (Math.random() - 0.5) * maxOffset;
       const randomY = (Math.random() - 0.5) * maxOffset;
       const randomZ = (Math.random() - 0.5) * maxOffset;
