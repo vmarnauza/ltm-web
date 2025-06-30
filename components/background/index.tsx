@@ -3,6 +3,7 @@ import * as THREE from "three";
 import {
   EffectComposer,
   EffectPass,
+  GodRaysEffect,
   NoiseEffect,
   RenderPass,
   ShaderPass,
@@ -39,7 +40,7 @@ function initBackground(container: HTMLDivElement) {
   renderer.setSize(innerWidth, innerHeight);
   // light setup
   const pointLight = new THREE.PointLight(0x404040, 70, 0, 0.01);
-  pointLight.position.set(-20, 10, 20);
+  pointLight.position.set(-20, 2, 20);
   pointLight.castShadow = true;
   scene.add(pointLight);
 
@@ -78,6 +79,22 @@ function initBackground(container: HTMLDivElement) {
       sphere.rotation.z = 0.5;
       scene.add(sphere);
 
+      // Make the moon itself glow by adding emissive properties
+      material.emissive = new THREE.Color(0x333333); // Subtle glow
+      material.emissiveIntensity = 0.7;
+
+      // God rays effect using the moon sphere itself as the light source
+      const godRaysEffect = new GodRaysEffect(camera, sphere, {
+        height: 480,
+        kernelSize: 4,
+        density: 0.8,
+        decay: 0.88,
+        weight: 0.4,
+        exposure: 0.6,
+        samples: 40,
+        clampMax: 1.0,
+      });
+
       // const bloomEffect = new BloomEffect({
       //   blendFunction: BlendFunction.COLOR_DODGE,
       //   kernelSize: KernelSize.SMALL,
@@ -96,23 +113,12 @@ function initBackground(container: HTMLDivElement) {
       // glitchEffect.maxDelay = 20;
       // glitchEffect.mode = GlitchMode.SPORADIC;
 
-      // const godRaysEffect = new GodRaysEffect(camera, sphere, {
-      //   height: 480,
-      //   kernelSize: 2,
-      //   density: 1,
-      //   decay: 0.9,
-      //   weight: 0.5,
-      //   exposure: 0.3,
-      //   samples: 20,
-      //   clampMax: 0.95,
-      // });
-
       const noiseEffect = new NoiseEffect();
       noiseEffect.premultiply = true;
 
       grainMaterial = new THREE.ShaderMaterial({
         uniforms: {
-          inputBuffer: { value: null }, // This is what ShaderPass expects
+          inputBuffer: { value: null },
           timer: { value: 1.0 },
           resolution: {
             value: new THREE.Vector2(innerWidth, innerHeight),
@@ -122,7 +128,7 @@ function initBackground(container: HTMLDivElement) {
           coloramount: { value: 0.1 },
           grainsize: { value: 2.5 },
           lumamount: { value: 0.8 },
-          showBurns: { value: true }, // Toggle film burns and damage
+          showBurns: { value: true },
         },
         vertexShader: grainVert,
         fragmentShader: grainFrag,
@@ -130,8 +136,8 @@ function initBackground(container: HTMLDivElement) {
       const grainPass = new ShaderPass(grainMaterial);
       grainPass.renderToScreen = false; // Let composer handle this
 
-      // const effectPass = new EffectPass(camera, noiseEffect);
-      // effectPass.renderToScreen = true;
+      const effectPass = new EffectPass(camera, godRaysEffect);
+      effectPass.renderToScreen = true;
 
       composer = new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene, camera));
