@@ -9,7 +9,11 @@ import {
   ShaderPass,
 } from "postprocessing";
 import { grainFrag, grainVert } from "./shaders/grain";
-// import { starfieldFrag, starfieldVert } from "./shaders/starfield";
+import { starfieldFrag, starfieldVert } from "./shaders/starfield";
+
+type CloudParticle = THREE.Mesh & {
+  originalPosition?: THREE.Vector3;
+};
 
 export default function Background() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,11 +77,11 @@ function initBackground(container: HTMLDivElement) {
   //     skyRadius: { value: skyDomeRadius },
   //     env_c1: { value: new THREE.Color("#000000") },
   //     env_c2: { value: new THREE.Color("#000000") },
-  //     noiseOffset: { value: new THREE.Vector3(50, 100.01, 100.01) },
-  //     starSize: { value: 0.002 },
-  //     starDensity: { value: 0.1 },
+  //     noiseOffset: { value: new THREE.Vector3(100, 100.01, 100.01) },
+  //     starSize: { value: 0.003 },
+  //     starDensity: { value: 0.04 },
   //     clusterStrength: { value: 0.2 },
-  //     clusterSize: { value: 0.3 },
+  //     clusterSize: { value: 0.1 },
   //   },
   //   vertexShader: starfieldVert,
   //   fragmentShader: starfieldFrag,
@@ -151,7 +155,7 @@ function initBackground(container: HTMLDivElement) {
     }
   );
 
-  const cloudParticles: THREE.Mesh[] = [];
+  const cloudParticles: CloudParticle[] = [];
   texloader.load("/images/cloud-particle.png", (tex) => {
     const cloudGeometry = new THREE.PlaneGeometry(22, 22);
     const cloudMaterial = new THREE.MeshLambertMaterial({
@@ -161,7 +165,10 @@ function initBackground(container: HTMLDivElement) {
 
     const maxClouds = innerWidth > 768 ? 120 : 20;
     for (let i = 0; i < maxClouds; i++) {
-      const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
+      const cloud = new THREE.Mesh(
+        cloudGeometry,
+        cloudMaterial
+      ) as CloudParticle;
       const positionOffset = moonSize;
       const maxOffset =
         innerWidth > 768 ? 100 - positionOffset : 40 - positionOffset;
@@ -174,18 +181,19 @@ function initBackground(container: HTMLDivElement) {
         randomY > 0 ? randomY + positionOffset : randomY - positionOffset,
         randomZ > 0 ? randomZ + positionOffset : randomZ - positionOffset
       );
+      cloud.originalPosition = cloud.position.clone();
 
-      cloud.material.opacity = 0.4;
+      if (!Array.isArray(cloud.material)) {
+        cloud.material.opacity = 0.4;
+      }
       cloudParticles.push(cloud);
       scene.add(cloud);
     }
   });
 
   function render() {
-    // renderer.render(scene, camera);
     composer?.render();
 
-    // Update grain shader timer
     if (grainMaterial) {
       grainMaterial.uniforms.timer.value = performance.now() * 0.001;
     }
@@ -206,9 +214,30 @@ function initBackground(container: HTMLDivElement) {
   window.addEventListener("mousemove", (event) => {
     const posX = event.clientX;
     const posY = event.clientY;
+    const relativeX = (posX / window.innerWidth) * 2 - 1;
+    const relativeY = (posY / window.innerHeight) * 2 - 1;
+    const minDistance = -55;
+    const maxDistance = 55;
+    const distanceRange = maxDistance - minDistance;
 
-    pointLight.position.x = ((posX / window.innerWidth) * 2 - 1) * 20;
-    pointLight.position.y = ((posY / window.innerHeight) * 2 - 1) * 20 * -0.1;
+    pointLight.position.x = relativeX * 20;
+    pointLight.position.y = relativeY * 20 * -0.1;
+
+    // parallax effect
+    if (sphere) {
+      sphere.position.x = relativeX * -0.5;
+      sphere.position.y = relativeY * 0.5;
+    }
+    cloudParticles.forEach((cloud) => {
+      const normalizedZ =
+        (cloud.originalPosition?.z ?? 0) + Math.abs(minDistance);
+      const distanceMult = (normalizedZ / distanceRange) * 1.5;
+
+      cloud.position.x =
+        (cloud.originalPosition?.x ?? 0) + relativeX * -distanceMult;
+      cloud.position.y =
+        (cloud.originalPosition?.y ?? 0) + relativeY * distanceMult;
+    });
   });
 
   window.addEventListener("touchmove", (event) => {
