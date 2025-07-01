@@ -5,7 +5,7 @@ export interface WindowWithGtag extends Window {
 }
 
 export default function GtmHead() {
-  if (process.env.NODE_ENV !== "production") return null;
+  if (process.env.ENV !== "production") return null;
 
   return (
     <>
@@ -39,7 +39,7 @@ export default function GtmHead() {
 }
 
 // export function GtmBody() {
-//   if (process.env.NODE_ENV !== 'production') return null
+//   if (process.env.ENV !== 'production') return null
 //   if (!process.env.NEXT_PUBLIC_GTM_ID) return null
 
 //   return (
