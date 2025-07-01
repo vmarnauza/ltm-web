@@ -2,13 +2,14 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import {
   EffectComposer,
-  EffectPass,
-  GodRaysEffect,
+  // EffectPass,
+  // GodRaysEffect,
   NoiseEffect,
   RenderPass,
   ShaderPass,
 } from "postprocessing";
 import { grainFrag, grainVert } from "./shaders/grain";
+// import { starfieldFrag, starfieldVert } from "./shaders/starfield";
 
 export default function Background() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -61,10 +62,31 @@ function initBackground(container: HTMLDivElement) {
   camera.position.z = 50;
   camera.position.y = 0;
 
-  var texloader = new THREE.TextureLoader();
+  const texloader = new THREE.TextureLoader();
   let sphere: THREE.Mesh;
   let composer: EffectComposer;
   let grainMaterial: THREE.ShaderMaterial;
+
+  // const skyDomeRadius = 500;
+  // const sphereMaterial = new THREE.ShaderMaterial({
+  //   uniforms: {
+  //     skyRadius: { value: skyDomeRadius },
+  //     env_c1: { value: new THREE.Color("#000000") },
+  //     env_c2: { value: new THREE.Color("#000000") },
+  //     noiseOffset: { value: new THREE.Vector3(50, 100.01, 100.01) },
+  //     starSize: { value: 0.002 },
+  //     starDensity: { value: 0.1 },
+  //     clusterStrength: { value: 0.2 },
+  //     clusterSize: { value: 0.3 },
+  //   },
+  //   vertexShader: starfieldVert,
+  //   fragmentShader: starfieldFrag,
+  //   side: THREE.DoubleSide,
+  // });
+  // const sphereGeometry = new THREE.SphereGeometry(skyDomeRadius, 20, 20);
+  // const skyDome = new THREE.Mesh(sphereGeometry, sphereMaterial);
+  // scene.add(skyDome);
+
   texloader.load(
     "/images/moon-texture.png",
     (tex) => {
@@ -78,22 +100,6 @@ function initBackground(container: HTMLDivElement) {
       sphere = new THREE.Mesh(geometry, material);
       sphere.rotation.z = 0.5;
       scene.add(sphere);
-
-      // Make the moon itself glow by adding emissive properties
-      material.emissive = new THREE.Color(0x333333); // Subtle glow
-      material.emissiveIntensity = 0.7;
-
-      // God rays effect using the moon sphere itself as the light source
-      const godRaysEffect = new GodRaysEffect(camera, sphere, {
-        height: 480,
-        kernelSize: 4,
-        density: 0.8,
-        decay: 0.88,
-        weight: 0.4,
-        exposure: 0.6,
-        samples: 40,
-        clampMax: 1.0,
-      });
 
       // const bloomEffect = new BloomEffect({
       //   blendFunction: BlendFunction.COLOR_DODGE,
@@ -134,15 +140,11 @@ function initBackground(container: HTMLDivElement) {
         fragmentShader: grainFrag,
       });
       const grainPass = new ShaderPass(grainMaterial);
-      grainPass.renderToScreen = false; // Let composer handle this
-
-      const effectPass = new EffectPass(camera, godRaysEffect);
-      effectPass.renderToScreen = true;
+      grainPass.renderToScreen = true; // Make this the final pass for now
 
       composer = new EffectComposer(renderer);
       composer.addPass(new RenderPass(scene, camera));
       composer.addPass(grainPass);
-      // composer.addPass(effectPass);
     },
     (error) => {
       console.error("Error loading texture:", error);
@@ -173,7 +175,7 @@ function initBackground(container: HTMLDivElement) {
         randomZ > 0 ? randomZ + positionOffset : randomZ - positionOffset
       );
 
-      cloud.material.opacity = 0.3;
+      cloud.material.opacity = 0.4;
       cloudParticles.push(cloud);
       scene.add(cloud);
     }
