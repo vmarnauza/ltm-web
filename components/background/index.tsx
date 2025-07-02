@@ -9,7 +9,7 @@ import {
   ShaderPass,
 } from "postprocessing";
 import { grainFrag, grainVert } from "./shaders/grain";
-import { starfieldFrag, starfieldVert } from "./shaders/starfield";
+// import { starfieldFrag, starfieldVert } from "./shaders/starfield";
 
 type CloudParticle = THREE.Mesh & {
   originalPosition?: THREE.Vector3;
@@ -211,9 +211,7 @@ function initBackground(container: HTMLDivElement) {
 
   requestAnimationFrame(render);
 
-  window.addEventListener("mousemove", (event) => {
-    const posX = event.clientX;
-    const posY = event.clientY;
+  function handleMove(posX: number, posY: number) {
     const relativeX = (posX / window.innerWidth) * 2 - 1;
     const relativeY = (posY / window.innerHeight) * 2 - 1;
     const minDistance = -55;
@@ -238,14 +236,18 @@ function initBackground(container: HTMLDivElement) {
       cloud.position.y =
         (cloud.originalPosition?.y ?? 0) + relativeY * distanceMult;
     });
+  }
+
+  window.addEventListener("mousemove", (event) => {
+    const posX = event.clientX;
+    const posY = event.clientY;
+    handleMove(posX, posY);
   });
 
   window.addEventListener("touchmove", (event) => {
     const posX = event.touches[0].clientX;
     const posY = event.touches[0].clientY;
-
-    pointLight.position.x = ((posX / window.innerWidth) * 2 - 1) * 20;
-    pointLight.position.y = ((posY / window.innerHeight) * 2 - 1) * 20 * -0.1;
+    handleMove(posX, posY);
   });
 
   window.addEventListener(
