@@ -1,5 +1,5 @@
-"use client";
 import Background from "@/components/background";
+import SoundPlayer from "@/components/sound/sound-player";
 import Link from "next/link";
 
 export default function Home() {
@@ -63,6 +63,7 @@ export default function Home() {
             ))}
           </div>
         </div>
+        <SoundPlayer className="fixed top-4 right-4 md:top-6 md:right-6 z-20" />
       </main>
     </>
   );
