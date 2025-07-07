@@ -41,11 +41,12 @@ function initBackground(container: HTMLDivElement) {
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x000000, 0.001);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
+
   renderer.setClearColor(scene.fog.color);
   renderer.setPixelRatio(devicePixelRatio);
   renderer.setSize(innerWidth, innerHeight);
   // light setup
-  const pointLight = new THREE.PointLight(0x404040, 70, 0, 0.01);
+  const pointLight = new THREE.PointLight(0x404040, 100, 0, 0.1);
   pointLight.position.set(-20, 2, 20);
   pointLight.castShadow = true;
   scene.add(pointLight);
@@ -53,9 +54,16 @@ function initBackground(container: HTMLDivElement) {
   // const ambientLight = new THREE.AmbientLight(0x404040, 10);
   // scene.add(ambientLight);
 
-  // const directionalLight = new THREE.DirectionalLight(0xff8c19, 0.5);
-  // directionalLight.position.set(0, 0, 1);
+  // const directionalLight = new THREE.DirectionalLight(0x404040, 10);
+  // directionalLight.position.set(0, 10, 0);
+  // directionalLight.rotateY(Math.PI / 2);
   // scene.add(directionalLight);
+  // const directionalLightHelper = new THREE.DirectionalLightHelper(
+  //   directionalLight,
+  //   10,
+  //   0xffff00
+  // );
+  // scene.add(directionalLightHelper);
   // const pointLightHelper = new THREE.PointLightHelper(pointLight, 10, 0xffff00);
   // scene.add(pointLightHelper);
 
