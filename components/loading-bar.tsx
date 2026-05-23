@@ -41,7 +41,7 @@ export default function LoadingBar({ progress, onComplete }: LoadingBarProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none">
+    <div className="fixed inset-0 z-30 flex items-center justify-center bg-black">
       <div className="w-48 h-px bg-white/20 overflow-hidden">
         <div
           className="h-full bg-white"
