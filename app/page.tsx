@@ -26,12 +26,12 @@ export default function Home() {
     },
     {
       children: "tiktok",
-      href: "https://www.tiktok.com/@literallymoonmusic",
+      href: "https://www.tiktok.com/@dj_menestins",
       target: "_blank",
     },
     {
       children: "instagram",
-      href: "https://www.instagram.com/literallymoonmusic/",
+      href: "https://www.instagram.com/dj_menestins/",
       target: "_blank",
     },
     {
