@@ -1,4 +1,4 @@
-import Background from "@/components/background";
+import LoadingGate from "@/components/loading-gate";
 import SoundPlayer from "@/components/sound/sound-player";
 import Link from "next/link";
 
@@ -42,8 +42,7 @@ export default function Home() {
   ];
 
   return (
-    <>
-      <Background />
+    <LoadingGate>
       <main className="fixed w-screen h-screen flex flex-col justify-between z-10 p-4 md:p-6 bg-stone-950/20">
         <div className="absolute bottom-4 right-4 text-white">
           <h1 className="text-xl md:text-4xl tracking-wider font-light">
@@ -65,6 +64,6 @@ export default function Home() {
         </div>
         <SoundPlayer className="fixed top-4 right-4 md:top-6 md:right-6 z-20" />
       </main>
-    </>
+    </LoadingGate>
   );
 }

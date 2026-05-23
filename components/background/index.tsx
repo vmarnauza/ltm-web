@@ -16,13 +16,19 @@ type CloudParticle = THREE.Mesh & {
   originalPosition?: THREE.Vector3;
 };
 
-export default function Background() {
+interface BackgroundProps {
+  onProgress?: (progress: number) => void;
+}
+
+export default function Background({ onProgress }: BackgroundProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const firstRenderDone = useRef(false);
+  const onProgressRef = useRef(onProgress);
+  onProgressRef.current = onProgress;
 
   useEffect(() => {
     if (containerRef.current && !firstRenderDone.current) {
-      initBackground(containerRef.current);
+      initBackground(containerRef.current, (p) => onProgressRef.current?.(p));
       firstRenderDone.current = true;
     }
   });
@@ -35,7 +41,10 @@ export default function Background() {
   );
 }
 
-function initBackground(container: HTMLDivElement) {
+function initBackground(
+  container: HTMLDivElement,
+  onProgress: (progress: number) => void
+) {
   const { innerHeight, innerWidth, devicePixelRatio } = window;
   const moonSize = 8;
   const scene = new THREE.Scene();
@@ -75,7 +84,19 @@ function initBackground(container: HTMLDivElement) {
   camera.position.z = 50;
   camera.position.y = 0;
 
-  const texloader = new THREE.TextureLoader();
+  const manager = new THREE.LoadingManager();
+  const fallbackTimer = setTimeout(() => onProgress(1), 10000);
+  manager.onProgress = (_url, loaded, total) => {
+    onProgress(loaded / total);
+  };
+  manager.onLoad = () => {
+    clearTimeout(fallbackTimer);
+    onProgress(1);
+  };
+  manager.onError = (url) => {
+    console.error("Failed to load texture:", url);
+  };
+  const texloader = new THREE.TextureLoader(manager);
   let sphere: THREE.Mesh;
   let composer: EffectComposer;
   let grainMaterial: THREE.ShaderMaterial;
