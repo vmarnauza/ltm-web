@@ -41,8 +41,23 @@ export default function Home() {
     },
   ];
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "MusicGroup",
+    name: "literally the moon",
+    url: "https://literallythemoon.com",
+    email: "literallythemoonmusic@gmail.com",
+    sameAs: buttonData
+      .filter(({ href }) => !href.startsWith("mailto:"))
+      .map(({ href }) => href),
+  };
+
   return (
     <LoadingGate>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <main className="fixed w-screen h-screen flex flex-col justify-between z-10 p-4 md:p-6 bg-stone-950/20">
         <div className="absolute bottom-4 right-4 text-white">
           <h1 className="text-xl md:text-4xl tracking-wider font-light">
